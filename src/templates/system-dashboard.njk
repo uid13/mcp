@@ -1,0 +1,37 @@
+# 🖥️ 系统信息仪表盘
+
+## 💾 内存使用情况
+
+```mermaid
+pie title 💾 内存使用 (总计 {{ totalGB }} GB)
+    "🔴 已用 {{ usedGB }}GB" : {{ usedPercent }}
+    "🟢 可用 {{ availGB }}GB" : {{ availPercent }}
+```
+
+##  磁盘使用率
+
+```mermaid
+pie title 💽 磁盘使用率 (%)
+{% for disk in disks %}
+    "{{ disk.icon }} {{ disk.mount }} {{ disk.usePercent }}%" : {{ disk.use }}
+{% endfor %}
+```
+
+##  系统概览
+
+| 项目 | 值 |
+|------|-----|
+| 🖥️ 操作系统 | {{ osInfo.distro }} {{ osInfo.release }} |
+| 🏠 主机名 | {{ osInfo.hostname }} |
+| 💻 CPU | {{ cpu.brand }} @ {{ cpu.speed }} GHz |
+| 🔢 物理核心 | {{ cpu.physicalCores }} |
+| 💾 内存总量 | {{ totalGB }} GB |
+| 📊 内存使用率 | {{ usedPercent }}% |
+
+## ⚙️ 软件版本
+
+| 软件 | 版本 |
+|------|------|
+|  Node.js | {{ versions.node or "N/A" }} |
+| 📦 npm | {{ versions.npm or "N/A" }} |
+|  Git | {{ versions.git or "N/A" }} |

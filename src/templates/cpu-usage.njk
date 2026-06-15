@@ -1,0 +1,22 @@
+#  CPU 使用率分析
+
+## 📊 平均负载：{{ avgLoad }}%
+
+```mermaid
+pie title 🧠 CPU 核心负载分布 (%)
+{% for core in cores %}
+    "{{ core.icon }} 核心{{ core.index }}" : {{ core.usage }}
+{% endfor %}
+```
+
+## 💻 CPU 信息
+
+| 项目 | 值 |
+|------|-----|
+| 🧩 型号 | {{ cpu.brand }} |
+| 🏢 制造商 | {{ cpu.manufacturer }} |
+| 🔢 物理核心 | {{ cpu.physicalCores }} |
+| 💨 逻辑核心 | {{ cpu.cores }} |
+| ⚡ 基础频率 | {{ cpu.speed }} GHz |
+| 🚀 最大频率 | {{ cpu.speedMax }} GHz |
+| 🌡️ 温度 | {{ cpuTemp.main or "N/A" }}°C |

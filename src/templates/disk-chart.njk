@@ -1,0 +1,18 @@
+# 💽 磁盘使用详情
+
+##  各分区使用率
+
+```mermaid
+pie title 💽 磁盘使用率 (%)
+{% for disk in disks %}
+    "{{ disk.icon }} {{ disk.mount }}" : {{ disk.use }}
+{% endfor %}
+```
+
+## 📋 磁盘详情
+
+| 挂载点 | 类型 | 总量 | 已用 | 可用 | 使用率 |
+|--------|------|------|------|------|--------|
+{% for disk in disks %}
+| {{ disk.mount }} | {{ disk.type }} | {{ disk.sizeGB }} GB | {{ disk.usedGB }} GB | {{ disk.availGB }} GB | {{ disk.usePercent }}% |
+{% endfor %}
