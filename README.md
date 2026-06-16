@@ -1,75 +1,127 @@
 # PCM - Personal Computer Manager
 
-个人电脑管家 MCP 服务，提供系统监控和 Mermaid 图表可视化。
+个人电脑管家 MCP 服务，提供系统监控和图片处理能力。
 
 ## 功能特性
 
--  **系统仪表盘** - Mermaid 图表可视化系统信息
-- 🧠 **CPU 监控** - CPU 核心负载分布图
--  **内存监控** - 内存分配详情图
-- 💽 **磁盘监控** - 磁盘使用率详情图
-- 🌐 **网络监控** - 网络接口分布图
+### 系统监控
+
+- 🖥️ **系统仪表盘** - 系统信息总览（内存、磁盘、CPU、软件版本）
+- 🧠 **CPU 监控** - CPU 各核心使用率分析
+- 💾 **内存监控** - 内存使用详情（含 swap 和插槽信息）
+- 💽 **磁盘监控** - 磁盘使用率详情
+- 📦 **软件版本** - 已安装开发软件版本检测
+- 🌐 **网络监控** - 网络接口信息
+
+### 图片处理
+
+基于策略模式 + 操作链模式，支持 13 种图片操作：
+
+- **几何变换**: resize（调整尺寸）、rotate（旋转）、extract（裁剪）、flip（垂直翻转）、flop（水平翻转）、trim（裁边缘）
+- **色彩效果**: blur（模糊）、sharpen（锐化）、greyscale（灰度化）、negate（反色）、normalize（对比度增强）
+- **合成叠加**: composite（水印/叠加）
+- **格式转换**: convert（格式转换，支持 jpeg/png/webp/avif）
 
 ## 技术栈
 
 - **语言**: TypeScript
-- **构建工具**: Vite 8.0.0
-- **MCP 框架**: FastMCP 4.3.0
-- **模板引擎**: Nunjucks 3.2.4
-- **系统信息**: systeminformation 5.31.7
-- **参数验证**: Zod 3.25.76
+- **构建工具**: Vite ^8.0.16
+- **MCP 框架**: FastMCP ^4.3.0
+- **图片处理**: Sharp ^0.34.5
+- **系统信息**: systeminformation ^5.31.7
+- **参数验证**: Zod ^3.22.0
+- **Schema 生成**: zod-to-json-schema ^3.24.0
 
 ## 快速开始
 
 ### 安装依赖
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 开发模式
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### 构建
 
 ```bash
-npm run build
+pnpm build
 ```
 
 ### 运行 MCP 服务
 
 ```bash
-npm start
+pnpm start
 ```
 
 ## 工具列表
 
+### 系统监控工具
+
 | 工具名称 | 描述 | 参数 |
 |---------|------|------|
-| `get_system_dashboard` | 获取系统信息仪表盘，包含内存、磁盘使用率的 Mermaid 饼图，以及软件版本信息 | 无 |
-| `get_cpu_usage_chart` | 获取 CPU 各核心使用率的 Mermaid 图表 | 无 |
-| `get_memory_chart` | 获取内存使用详细信息的 Mermaid 图表 | 无 |
-| `get_disk_chart` | 获取磁盘使用详细信息的 Mermaid 图表 | 无 |
-| `get_network_chart` | 获取网络接口信息的 Mermaid 图表 | 无 |
+| `get_system_dashboard` | 获取系统信息仪表盘 | 无 |
+| `get_cpu_usage_chart` | 获取 CPU 各核心使用率 | 无 |
+| `get_memory_chart` | 获取内存使用详情 | 无 |
+| `get_disk_chart` | 获取磁盘使用详情 | 无 |
+| `get_software_versions` | 获取已安装软件版本 | 无 |
+| `get_network_chart` | 获取网络接口信息 | 无 |
+
+### 图片处理工具
+
+| 工具名称 | 描述 | 参数 |
+|---------|------|------|
+| `image_capabilities` | 获取所有可用操作及参数定义 | 无 |
+| `image_info` | 获取图片元数据 | `inputPath`: 图片路径 |
+| `image_process` | 执行图片操作链 | `inputPath`, `operations`, `outputPath?` |
+
+#### 操作链示例
+
+```json
+{
+  "inputPath": "/path/to/image.png",
+  "operations": [
+    { "type": "resize", "width": 800 },
+    { "type": "rotate", "angle": 90 },
+    { "type": "sharpen" },
+    { "type": "convert", "format": "webp", "quality": 85 }
+  ],
+  "outputPath": "/path/to/output.webp"
+}
+```
 
 ## 项目结构
 
 ```
 pcm/
 ├── src/
-│   ├── index.ts              # 服务入口
-│   ├── tools/
-│   │   └── si.ts             # 系统信息工具（使用 Nunjucks 模板）
-│   └── templates/            # Nunjucks 模板目录
-│       ├── system-dashboard.njk
-│       ├── cpu-usage.njk
-│       ├── memory-chart.njk
-│       ├── disk-chart.njk
-│       └── network-chart.njk
-── package.json
+│   ├── index.ts                    # 服务入口
+│   └── tools/
+│       ├── si/
+│       │   └── index.ts            # 系统信息工具
+│       └── image/
+│           ├── types.ts            # 操作类型定义
+│           ├── registry.ts         # 操作注册表
+│           ├── index.ts            # 图片处理工具
+│           └── operations/         # 操作实现
+│               ├── resize.ts
+│               ├── rotate.ts
+│               ├── blur.ts
+│               ├── sharpen.ts
+│               ├── extract.ts
+│               ├── flip.ts
+│               ├── flop.ts
+│               ├── greyscale.ts
+│               ├── negate.ts
+│               ├── normalize.ts
+│               ├── trim.ts
+│               ├── composite.ts
+│               └── convert.ts
+├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
 └── README.md
@@ -77,27 +129,39 @@ pcm/
 
 ## 使用示例
 
-### 在 Claude Desktop 中使用
+### 直接运行
 
-```json
-{
-  "mcpServers": {
-    "pcm": {
-      "command": "node",
-      "args": ["dist/index.js"]
-    }
-  }
-}
+```bash
+# npx 直接运行（无需全局安装）
+npx @uid13/pcm
+
+# 全局安装后运行
+npm install -g @uid13/pcm
+pcm
 ```
 
-### 在 Cursor 中使用
+### 在 Codex 中使用
+
+编辑 `~/.codex/config.toml`：
+
+```toml
+[mcp_servers.pcm]
+type = "stdio"
+command = "npx"
+args = ["@uid13/pcm"]
+```
+
+### 在 OpenCode 中使用
+
+编辑 `~/.config/opencode/opencode.json`，在 `mcp` 对象中添加：
 
 ```json
 {
-  "mcpServers": {
-    "pcm": {
-      "command": "node",
-      "args": ["dist/index.js"]
+  "mcp": {
+    "Pcm": {
+      "enabled": true,
+      "type": "local",
+      "command": ["npx", "@uid13/pcm"]
     }
   }
 }
@@ -107,16 +171,13 @@ pcm/
 
 ### 使用 MCP Inspector 调试
 
-[MCP Inspector](https://github.com/modelcontextprotocol/inspector) 是官方提供的可视化调试工具，可以测试工具调用、查看请求/响应。
+[MCP Inspector](https://github.com/modelcontextprotocol/inspector) 是官方提供的可视化调试工具。
 
 #### 步骤 1：构建项目
 
 ```bash
-cd D:\AI\mcp\pcm
 pnpm build
 ```
-
-> **注意**：构建后需要确保模板文件已复制到 `dist/templates/` 目录。`package.json` 的 `build` 脚本已自动处理。
 
 #### 步骤 2：启动 Inspector
 
@@ -124,11 +185,7 @@ pnpm build
 npx fastmcp inspect dist/index.js
 ```
 
-浏览器会自动打开 Inspector 界面（通常是 `http://localhost:6274`）。
-
 #### 步骤 3：配置连接参数
-
-在 Inspector 界面中填写：
 
 | 字段 | 值 |
 |------|-----|
@@ -136,26 +193,20 @@ npx fastmcp inspect dist/index.js
 | **Command** | `node` |
 | **Arguments** | `D:/AI/mcp/pcm/dist/index.js` |
 
-> **⚠️ 重要**：Arguments 中必须使用**正斜杠** `/`，不能用反斜杠 `\`。Windows 路径中的 `\` 会被转义导致路径错误。
+> **⚠️ 重要**：Arguments 中必须使用**正斜杠** `/`，不能用反斜杠 `\`。
 
 #### 步骤 4：连接并测试
 
 1. 点击 **Connect** 按钮
 2. 左下角显示 **Connected**（绿色）表示连接成功
 3. 点击 **List Tools** 查看工具列表
-4. 选择任意工具（如 `get_cpu_usage_chart`）
-5. 点击 **Run Tool** 执行
-6. 查看返回的 Markdown + Mermaid 图表
+4. 选择任意工具执行
 
 #### 常见问题
 
 **Q: 连接时报错 `ENOENT` 或 `Command not found`**
 - 检查 Arguments 路径是否正确（使用正斜杠）
 - 确认 `dist/index.js` 文件存在
-
-**Q: 工具执行报错 `template not found`**
-- 确认 `dist/templates/` 目录下有 `.njk` 模板文件
-- 重新执行 `pnpm build` 确保模板已复制
 
 **Q: 修改代码后不生效**
 - 需要重新 `pnpm build`
@@ -172,7 +223,7 @@ node dist/index.js
 ### 开发模式（热重载）
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 文件修改后自动重新构建，适合开发调试。

@@ -1,10 +1,12 @@
+#!/usr/bin/env node
 /**
  * PCM - Personal Computer Manager MCP Service
  * 个人电脑管家 MCP 服务入口
  */
 
 import { FastMCP } from "fastmcp";
-import { registerSiTools } from "./tools/si.js";
+import { registerSiTools } from "./tools/si/index.js";
+import { registerImageTools } from "./tools/image/index.js";
 
 /**
  * 创建并配置 MCP 服务器
@@ -16,6 +18,7 @@ function createServer(): FastMCP {
   });
 
   registerSiTools(server);
+  registerImageTools(server);
 
   return server;
 }

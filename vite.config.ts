@@ -17,6 +17,7 @@ export default defineConfig({
   },
   ssr: {
     noExternal: true,
+    external: ['sharp'],
   },
   resolve: {
     alias: {
