@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+  tldjs: true
+minimumReleaseAgeExclude:
+  - fastmcp@4.3.0
