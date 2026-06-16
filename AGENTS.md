@@ -6,206 +6,164 @@
 pcm/
 ├── README.md           # 项目说明
 ├── AGENTS.md           # 本文件
-── package.json        # 依赖配置
+├── package.json        # 依赖配置
 ├── tsconfig.json       # TypeScript 配置
-├── vite.config.ts      # Vite 配置
-── src/
-    ├── index.ts        # MCP 服务入口
-    ├── tools/          # MCP 工具实现
-    │   ├── system.ts   # 系统信息工具
-    │   ├── files.ts    # 文件管理工具
-    │   ├── process.ts  # 进程管理工具
-    │   └── network.ts  # 网络工具
-    ├── utils/          # 工具函数
-    └── types/          # 类型定义
+├── vite.config.ts      # Vite 配置（SSR 模式构建 Node.js 服务）
+├── src/
+│   ├── index.ts        # MCP 服务入口
+│   ├── tools/
+│   │   └── si.ts       # 系统信息工具（使用 Nunjucks 模板）
+│   └── templates/      # Nunjucks 模板目录
+│       ├── system-dashboard.njk
+│       ├── cpu-usage.njk
+│       ├── memory-chart.njk
+│       ├── disk-chart.njk
+│       └── network-chart.njk
+└── dist/               # 构建输出（git 忽略）
+    ├── index.js
+    └── templates/      # 构建时自动复制
 ```
+
+## 技术栈
+
+| 组件 | 版本 | 用途 |
+|------|------|------|
+| FastMCP | ^4.3.0 | MCP 服务框架 |
+| Nunjucks | ^3.2.4 | 模板引擎（生成 Mermaid 图表） |
+| systeminformation | ^5.31.7 | 系统信息采集 |
+| Zod | ^3.25.76 | 参数验证 |
+| Vite | ^8.0.0 | 构建工具（SSR 模式） |
+| TypeScript | ^5.9.0 | 类型系统 |
 
 ## 开发环境
 
-### 要求
-
 - Node.js >= 18
-- npm >= 9
-- TypeScript >= 5.0
-
-### 依赖版本
-
-```json
-{
-  "vite": "^8.0.0",
-  "typescript": "^5.0.0",
-  "@modelcontextprotocol/sdk": "^0.5.0"
-}
-```
+- pnpm >= 9
 
 ## 开发规范
 
 ### 代码风格
 
 1. **使用 TypeScript 严格模式**
-   - 启用 `strict: true`
-   - 所有函数必须有返回类型注解
-   - 所有参数必须有类型注解
-
 2. **命名规范**
-   - 工具名称：`snake_case`（如 `get_system_info`）
-   - 函数名称：`camelCase`（如 `getSystemInfo`）
-   - 类名称：`PascalCase`（如 `SystemTool`）
-   - 常量：`UPPER_SNAKE_CASE`（如 `MAX_FILE_SIZE`）
-
+   - 工具名称：`snake_case`（如 `get_system_dashboard`）
+   - 函数名称：`camelCase`（如 `registerSiTools`）
+   - 模板文件：`kebab-case`（如 `cpu-usage.njk`）
 3. **文件组织**
-   - 每个工具一个文件
-   - 工具文件放在 `src/tools/` 目录
-   - 工具函数放在 `src/utils/` 目录
+   - 工具实现在 `src/tools/si.ts`
+   - 模板文件在 `src/templates/`
+   - 模板与逻辑分离，修改图表样式只需编辑 `.njk` 文件
 
 ### MCP 工具开发
 
-#### 工具定义模板
+使用 FastMCP 框架注册工具：
 
 ```typescript
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from 'zod';
+import { FastMCP } from "fastmcp";
+import { z } from "zod";
+import nunjucks from "nunjucks";
 
-export function registerSystemTools(server: McpServer) {
-  server.tool(
-    'get_system_info',
-    '获取系统基本信息',
-    {}, // 无参数
-    async () => {
-      // 实现逻辑
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(systemInfo, null, 2),
-          },
-        ],
-      };
-    }
-  );
+export function registerSiTools(server: FastMCP): void {
+  server.addTool({
+    name: "get_example",
+    description: "示例工具描述",
+    parameters: z.object({
+      // 参数定义（可选）
+    }),
+    execute: async () => {
+      // 使用 Nunjucks 渲染模板
+      return nunjucks.render("example.njk", { data: "value" });
+    },
+  });
 }
 ```
 
-#### 工具参数 Schema
+### Nunjucks 模板开发
 
-使用 Zod 定义参数验证：
+模板文件放在 `src/templates/` 目录，使用 `{{ }}` 插值和 `{% %}` 控制流：
 
-```typescript
-import { z } from 'zod';
+```njk
+# 标题
 
-const ListFilesParams = z.object({
-  path: z.string().describe('目录路径'),
-  recursive: z.boolean().optional().describe('是否递归列出'),
-});
+```mermaid
+pie title 图表标题
+{% for item in items %}
+    "{{ item.icon }} {{ item.name }}" : {{ item.value }}
+{% endfor %}
 ```
 
-#### 工具返回格式
-
-```typescript
-return {
-  content: [
-    {
-      type: 'text',
-      text: '工具执行结果',
-    },
-  ],
-  // 可选：结构化内容
-  structuredContent: {
-    key: 'value',
-  },
-};
+| 列1 | 列2 |
+|-----|-----|
+{% for row in rows %}
+| {{ row.col1 }} | {{ row.col2 }} |
+{% endfor %}
 ```
 
 ### 错误处理
 
-1. **工具执行错误**：返回错误信息，不要抛出异常
-2. **参数验证错误**：使用 Zod 验证，返回清晰的错误提示
-3. **系统错误**：记录日志，返回用户友好的错误信息
+工具执行失败时抛出异常，FastMCP 会自动处理并返回错误信息：
 
 ```typescript
 try {
-  // 执行操作
+  const data = await fetchData();
+  return nunjucks.render("template.njk", { data });
 } catch (error) {
-  return {
-    content: [
-      {
-        type: 'text',
-        text: `执行失败：${error.message}`,
-      },
-    ],
-    isError: true,
-  };
+  throw new Error(`操作失败：${error instanceof Error ? error.message : String(error)}`);
 }
 ```
 
-### 测试
-
-使用 Vitest 编写测试：
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { getSystemInfo } from '../tools/system';
-
-describe('System Tools', () => {
-  it('should return system info', async () => {
-    const result = await getSystemInfo();
-    expect(result).toHaveProperty('platform');
-    expect(result).toHaveProperty('arch');
-  });
-});
-```
-
-运行测试：
+### 构建
 
 ```bash
-npm run test
+pnpm build
 ```
 
-### 构建和发布
-
-```bash
-# 开发模式
-npm run dev
-
-# 构建
-npm run build
-
-# 发布到 npm
-npm publish
-```
+构建后 `dist/` 目录包含：
+- `index.js` — 打包后的服务代码（含所有依赖）
+- `templates/` — 自动从 `src/templates/` 复制的模板文件
 
 ## 调试
 
-### 使用 MCP Inspector
+### MCP Inspector
 
 ```bash
-npx @modelcontextprotocol/inspector node dist/index.js
+pnpm build
+npx fastmcp inspect dist/index.js
 ```
+
+浏览器打开后配置：
+- **Command**: `node`
+- **Arguments**: `D:/AI/mcp/pcm/dist/index.js`（使用正斜杠）
 
 ### 日志输出
 
 使用 `console.error` 输出调试信息（不会干扰 MCP 协议）：
 
 ```typescript
-console.error('[PCM] 调试信息:', data);
+console.error("[PCM] 调试信息:", data);
 ```
 
 ## 常见问题
 
-### Q: 工具没有被 AI 识别？
+### Q: 工具执行报错 `template not found`
 
-A: 确保工具名称和描述清晰，参数 Schema 正确。
+A: 确认 `dist/templates/` 目录下有对应的 `.njk` 文件。重新执行 `pnpm build` 确保模板已复制。
 
-### Q: 如何添加新工具？
+### Q: Inspector 连接报错 `ENOENT`
 
-A: 在 `src/tools/` 创建新文件，在 `src/index.ts` 中注册。
+A: Arguments 中必须使用正斜杠 `/`，Windows 的 `\` 会被转义。
 
-### Q: 如何处理大文件操作？
+### Q: 修改代码后不生效
 
-A: 使用流式处理，避免一次性加载大文件到内存。
+A: 需要重新 `pnpm build`，然后关闭 Inspector（`Ctrl+C`）重新执行 `npx fastmcp inspect dist/index.js`。
+
+### Q: 如何添加新工具
+
+A: 在 `src/tools/si.ts` 的 `registerSiTools` 函数中添加 `server.addTool()` 调用，同时在 `src/templates/` 创建对应模板文件。
 
 ## 参考资源
 
+- [FastMCP 文档](https://github.com/punkpeye/fastmcp)
+- [Nunjucks 文档](https://mozilla.github.io/nunjucks/)
+- [systeminformation 文档](https://systeminformation.io/)
 - [MCP 协议规范](https://modelcontextprotocol.io/)
-- [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
-- [Vite 文档](https://vitejs.dev/)
