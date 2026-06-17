@@ -5,8 +5,8 @@ export default defineConfig({
   build: {
     target: 'node22',
     outDir: 'dist',
-    sourcemap: true,
-    minify: false,
+    sourcemap: false,
+    minify: true,
     ssr: 'src/index.ts',
     rolldownOptions: {
       output: {
