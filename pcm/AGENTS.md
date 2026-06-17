@@ -14,24 +14,29 @@ pcm/
 │   └── tools/
 │       ├── si/
 │       │   └── index.ts       # 系统信息工具
-│       └── image/
-│           ├── types.ts       # 操作类型定义
-│           ├── registry.ts    # 操作注册表
-│           ├── index.ts       # 图片处理工具
-│           └── operations/    # 操作实现
-│               ├── resize.ts
-│               ├── rotate.ts
-│               ├── blur.ts
-│               ├── sharpen.ts
-│               ├── extract.ts
-│               ├── flip.ts
-│               ├── flop.ts
-│               ├── greyscale.ts
-│               ├── negate.ts
-│               ├── normalize.ts
-│               ├── trim.ts
-│               ├── composite.ts
-│               └── convert.ts
+│       ├── image/
+│       │   ├── types.ts       # 操作类型定义
+│       │   ├── registry.ts    # 操作注册表
+│       │   ├── index.ts       # 图片处理工具
+│       │   └── operations/    # 操作实现
+│       │       ├── resize.ts
+│       │       ├── rotate.ts
+│       │       ├── blur.ts
+│       │       ├── sharpen.ts
+│       │       ├── extract.ts
+│       │       ├── flip.ts
+│       │       ├── flop.ts
+│       │       ├── greyscale.ts
+│       │       ├── negate.ts
+│       │       ├── normalize.ts
+│       │       ├── trim.ts
+│       │       ├── composite.ts
+│       │       └── convert.ts
+│       └── cc/
+│           ├── index.ts       # 视频嗅探工具
+│           ├── downloader.ts   # m3u8 下载命令生成
+│           ├── sniffer.ts     # 核心嗅探逻辑
+│           └── deep-search.ts # 深度搜索 Hook 脚本
 └── dist/               # 构建输出（git 忽略）
     └── index.js
 ```
@@ -43,8 +48,8 @@ pcm/
 | FastMCP | ^4.3.0 | MCP 服务框架 |
 | Sharp | ^0.34.5 | 图片处理 |
 | systeminformation | ^5.31.7 | 系统信息采集 |
-| Zod | ^3.22.0 | 参数验证 |
-| zod-to-json-schema | ^3.24.0 | 生成 JSON Schema |
+| Zod | ^4.4.3 | 参数验证 |
+| Puppeteer | ^24.9.0 | 浏览器自动化（嗅探工具） |
 | Vite | ^8.0.16 | 构建工具（SSR 模式） |
 | TypeScript | ^5.0.0 | 类型系统 |
 
@@ -66,6 +71,7 @@ pcm/
    - 系统工具在 `src/tools/si/index.ts`
    - 图片工具在 `src/tools/image/`
    - 图片操作在 `src/tools/image/operations/`
+   - 嗅探工具在 `src/tools/cc/`
 
 ### MCP 工具开发
 

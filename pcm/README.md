@@ -1,6 +1,6 @@
 # PCM - Personal Computer Manager
 
-个人电脑管家 MCP 服务，提供系统监控和图片处理能力。
+个人电脑管家 MCP 服务，提供系统监控、图片处理和视频嗅探能力。
 
 ## 功能特性
 
@@ -22,6 +22,16 @@
 - **合成叠加**: composite（水印/叠加）
 - **格式转换**: convert（格式转换，支持 jpeg/png/webp/avif）
 
+### 视频嗅探
+
+基于 Puppeteer 的三层嗅探架构（网络层 + 深度搜索 + 密钥检测），支持 m3u8/mp4/mpd 等媒体资源：
+
+- **sniff** - 嗅探网页中的视频/音频资源地址
+- **sniff-and-download** - 嗅探并生成 m3u8dl 下载命令
+- **download-m3u8** - 生成 m3u8dl 下载命令（不执行）
+
+系统要求：需安装 Chromium 内核浏览器（Chrome/Edge/Brave/Opera）和 [N_m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE/releases)。
+
 ## 技术栈
 
 - **语言**: TypeScript
@@ -29,8 +39,8 @@
 - **MCP 框架**: FastMCP ^4.3.0
 - **图片处理**: Sharp ^0.34.5
 - **系统信息**: systeminformation ^5.31.7
-- **参数验证**: Zod ^3.22.0
-- **Schema 生成**: zod-to-json-schema ^3.24.0
+- **参数验证**: Zod ^4.4.3
+- **浏览器自动化**: Puppeteer ^24.9.0
 
 ## 快速开始
 
@@ -79,6 +89,14 @@ pnpm start
 | `image_info` | 获取图片元数据 | `inputPath`: 图片路径 |
 | `image_process` | 执行图片操作链 | `inputPath`, `operations`, `outputPath?` |
 
+### 视频嗅探工具
+
+| 工具名称 | 描述 | 参数 |
+|---------|------|------|
+| `sniff` | 嗅探网页中的媒体资源地址 | `url`, `waitTime?`, `headless?`, `networkIdleTime?`, `showAll?` |
+| `sniff-and-download` | 嗅探并生成下载命令 | `url`, `waitTime?`, `headless?`, `outputDir?`, `fileName?`, `autoSelect?` |
+| `download-m3u8` | 生成 m3u8dl 下载命令 | `m3u8Url`, `outputDir?`, `fileName?` |
+
 #### 操作链示例
 
 ```json
@@ -103,24 +121,28 @@ pcm/
 │   └── tools/
 │       ├── si/
 │       │   └── index.ts            # 系统信息工具
-│       └── image/
-│           ├── types.ts            # 操作类型定义
-│           ├── registry.ts         # 操作注册表
-│           ├── index.ts            # 图片处理工具
-│           └── operations/         # 操作实现
-│               ├── resize.ts
-│               ├── rotate.ts
-│               ├── blur.ts
-│               ├── sharpen.ts
-│               ├── extract.ts
-│               ├── flip.ts
-│               ├── flop.ts
-│               ├── greyscale.ts
-│               ├── negate.ts
-│               ├── normalize.ts
-│               ├── trim.ts
-│               ├── composite.ts
-│               └── convert.ts
+│       ├── image/
+│       │   ├── types.ts            # 操作类型定义
+│       │   ├── registry.ts         # 操作注册表
+│       │   ├── index.ts            # 图片处理工具
+│       │   └── operations/         # 操作实现
+│       │       ├── resize.ts
+│       │       ├── rotate.ts
+│       │       ├── blur.ts
+│       │       ├── sharpen.ts
+│       │       ├── extract.ts
+│       │       ├── flip.ts
+│       │       ├── flop.ts
+│       │       ├── greyscale.ts
+│       │       ├── negate.ts
+│       │       ├── normalize.ts
+│       │       ├── trim.ts
+│       │       ├── composite.ts
+│       │       └── convert.ts
+│       └── cc/
+│           ├── index.ts            # 视频嗅探工具
+│           ├── sniffer.ts          # 核心嗅探逻辑
+│           └── deep-search.ts      # 深度搜索 Hook 脚本
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts

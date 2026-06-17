@@ -5,7 +5,6 @@
 
 import { FastMCP } from "fastmcp";
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import sharp from "sharp";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve, parse, join } from "node:path";
@@ -30,7 +29,7 @@ export function registerImageTools(server: FastMCP): void {
       const capabilities = Object.entries(operations).map(([name, def]) => ({
         name,
         description: def.description,
-        parameters: zodToJsonSchema(def.schema),
+        parameters: def.schema.toJSONSchema(),
       }));
       return JSON.stringify(capabilities, null, 2);
     },
@@ -81,7 +80,7 @@ export function registerImageTools(server: FastMCP): void {
       // 校验 composite 操作的叠加图片是否存在
       for (const op of ops) {
         if (op.type === "composite" && "input" in op) {
-          await validateCompositeInput((op as { input: string }).input);
+          await validateCompositeInput((op as unknown as { input: string }).input);
         }
       }
 
@@ -91,11 +90,11 @@ export function registerImageTools(server: FastMCP): void {
         (pipe, op) => {
           const def = operations[op.type];
           if (!def) throw new Error(`未知操作: ${op.type}，请先调用 image_capabilities 查看可用操作`);
-          const params = def.schema.parse(op);
+          const params = def.schema.parse(op) as Record<string, unknown>;
           if (op.type === "convert" && "format" in params) {
-            lastConvertFormat = (params as { format: string }).format;
+            lastConvertFormat = params.format as string;
           }
-          return def.handler(pipe, params);
+          return def.handler(pipe, params as z.infer<typeof def.schema>);
         },
         sharp(buffer),
       );

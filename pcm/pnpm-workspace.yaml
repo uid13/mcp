@@ -1,6 +1,8 @@
 allowBuilds:
   esbuild: true
+  puppeteer: true
   sharp: true
   tldjs: true
 minimumReleaseAgeExclude:
   - fastmcp@4.3.0
+  - user-agents@2.1.94

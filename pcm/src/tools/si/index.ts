@@ -257,7 +257,7 @@ export function registerSiTools(server: FastMCP): void {
             iface: i.iface,
             ip4: i.ip4 || "N/A",
             mac: i.mac,
-            speed: i.speed > 0 ? `${i.speed} Mbps` : "N/A",
+            speed: (i.speed ?? 0) > 0 ? `${i.speed} Mbps` : "N/A",
             operstate: i.operstate,
           })),
         },

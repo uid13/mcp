@@ -7,6 +7,7 @@
 import { FastMCP } from "fastmcp";
 import { registerSiTools } from "./tools/si/index.js";
 import { registerImageTools } from "./tools/image/index.js";
+import { registerCcTools } from "./tools/cc/index.js";
 
 /**
  * 创建并配置 MCP 服务器
@@ -19,6 +20,7 @@ function createServer(): FastMCP {
 
   registerSiTools(server);
   registerImageTools(server);
+  registerCcTools(server);
 
   return server;
 }

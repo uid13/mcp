@@ -1,6 +1,6 @@
 {
   "name": "@uid13/pcm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Personal Computer Manager MCP Service - 个人电脑管家 MCP 服务",
   "type": "module",
   "main": "dist/index.js",
@@ -56,13 +56,16 @@
   },
   "dependencies": {
     "fastmcp": "^4.3.0",
+    "puppeteer": "^24.9.0",
     "sharp": "^0.34.5",
     "systeminformation": "^5.31.7",
-    "zod": "^3.22.0",
-    "zod-to-json-schema": "^3.24.0"
+    "user-agents": "^2.1.94",
+    "which": "^7.0.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/which": "^3.0.4",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
