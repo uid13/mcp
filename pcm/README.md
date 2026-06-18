@@ -1,6 +1,6 @@
 # PCM - Personal Computer Manager
 
-个人电脑管家 MCP 服务，提供系统监控、图片处理和视频嗅探能力。
+个人电脑管家 MCP 服务，提供系统监控、图片处理、视频嗅探和图标搜索能力。
 
 ## 功能特性
 
@@ -30,6 +30,12 @@
 - **download-m3u8** - 生成 m3u8dl 下载命令（不执行）
 
 系统要求：需安装 Chromium 内核浏览器（Chrome/Edge/Brave/Opera）和 [N_m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE/releases)。
+
+### 图标搜索
+
+基于 Iconify 公共 API，支持海量开源图标搜索：
+
+- **icon_search** - 搜索 Iconify 图标库，返回 JSON，支持按图标集、分类、彩色/单色过滤
 
 ## 技术栈
 
@@ -95,6 +101,12 @@ pnpm start
 | `sniff` | 嗅探网页中的媒体资源地址，返回 JSON（含 selected 最佳 URL + requestHeaders） | `url`, `waitTime?`, `headless?`, `networkIdleTime?`, `showAll?` |
 | `download-m3u8` | 生成 m3u8dl 下载命令，返回 JSON | `m3u8Url`, `referer?`, `origin?`, `outputDir?`, `fileName?` |
 
+### 图标搜索工具
+
+| 工具名称 | 描述 | 参数 |
+|---------|------|------|
+| `icon_search` | 搜索 Iconify 图标库，返回 JSON，支持彩色/单色过滤 | `query`, `limit?`, `start?`, `prefix?`, `prefixes?`, `category?`, `palette?` |
+
 #### 操作链示例
 
 ```json
@@ -139,8 +151,14 @@ pcm/
 │       │       └── convert.ts
 │       └── cc/
 │           ├── index.ts            # 视频嗅探工具
+│           ├── downloader.ts       # m3u8 下载命令生成
 │           ├── sniffer.ts          # 核心嗅探逻辑
 │           └── deep-search.ts      # 深度搜索 Hook 脚本
+│       └── iconify/
+│           ├── index.ts            # Iconify 图标搜索工具
+│           ├── types.ts            # 类型定义
+│           ├── search.ts           # API 搜索逻辑
+│           └── render-guide.ts     # 渲染指引
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts

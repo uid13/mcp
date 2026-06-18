@@ -37,6 +37,11 @@ pcm/
 │           ├── downloader.ts   # m3u8 下载命令生成
 │           ├── sniffer.ts     # 核心嗅探逻辑
 │           └── deep-search.ts # 深度搜索 Hook 脚本
+│       └── iconify/
+│           ├── index.ts       # Iconify 图标搜索工具
+│           ├── types.ts       # 类型定义
+│           ├── search.ts      # API 搜索逻辑
+│           └── render-guide.ts# 渲染指引
 └── dist/               # 构建输出（git 忽略）
     └── index.js
 ```
