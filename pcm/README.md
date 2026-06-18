@@ -26,8 +26,7 @@
 
 基于 Puppeteer 的三层嗅探架构（网络层 + 深度搜索 + 密钥检测），支持 m3u8/mp4/mpd 等媒体资源：
 
-- **sniff** - 嗅探网页中的视频/音频资源地址
-- **sniff-and-download** - 嗅探并生成 m3u8dl 下载命令
+- **sniff** - 嗅探网页中的 m3u8/mp4/mpd 等媒体资源，返回 JSON（含 selected 最佳 URL + requestHeaders）
 - **download-m3u8** - 生成 m3u8dl 下载命令（不执行）
 
 系统要求：需安装 Chromium 内核浏览器（Chrome/Edge/Brave/Opera）和 [N_m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE/releases)。
@@ -93,9 +92,8 @@ pnpm start
 
 | 工具名称 | 描述 | 参数 |
 |---------|------|------|
-| `sniff` | 嗅探网页中的媒体资源地址 | `url`, `waitTime?`, `headless?`, `networkIdleTime?`, `showAll?` |
-| `sniff-and-download` | 嗅探并生成下载命令 | `url`, `waitTime?`, `headless?`, `outputDir?`, `fileName?`, `autoSelect?` |
-| `download-m3u8` | 生成 m3u8dl 下载命令 | `m3u8Url`, `outputDir?`, `fileName?` |
+| `sniff` | 嗅探网页中的媒体资源地址，返回 JSON（含 selected 最佳 URL + requestHeaders） | `url`, `waitTime?`, `headless?`, `networkIdleTime?`, `showAll?` |
+| `download-m3u8` | 生成 m3u8dl 下载命令，返回 JSON | `m3u8Url`, `referer?`, `origin?`, `outputDir?`, `fileName?` |
 
 #### 操作链示例
 

@@ -16,7 +16,7 @@ export function registerCcTools(server: FastMCP): void {
   server.addTool({
     name: "sniff",
     description:
-      "嗅探网页中的视频/音频资源地址。输入网页 URL，返回所有嗅探到的 m3u8/mp4 等媒体资源列表。",
+      "嗅探网页中的视频/音频资源地址。返回 JSON，含 selected 最佳 m3u8（含 requestHeaders）和完整媒体资源列表。",
     parameters: z.object({
       url: z
         .string()
@@ -56,154 +56,119 @@ export function registerCcTools(server: FastMCP): void {
         );
         const mp4List = results.filter((r) => r.ext === "mp4");
         const mpdList = results.filter((r) => r.ext === "mpd");
-        const otherList = results.filter(
-          (r) => !["m3u8", "m3u", "mp4", "mpd"].includes(r.ext),
-        );
+        const otherList = showAll
+          ? results.filter(
+              (r) => !["m3u8", "m3u", "mp4", "mpd"].includes(r.ext),
+            )
+          : [];
 
-        let output = `## 嗅探结果\n\n共发现 **${results.length}** 个媒体资源\n\n`;
-
+        // 自动选择最佳 m3u8
+        let selected = null;
         if (m3u8List.length > 0) {
-          output += `### M3U8 资源 (${m3u8List.length}个)\n\n`;
-          m3u8List.forEach((r, i) => {
-            output += `${i + 1}. \`${r.url}\`\n`;
-          });
-          output += "\n";
+          try {
+            const best = await selectBestM3u8(m3u8List);
+            selected = {
+              url: best.url,
+              ext: best.ext,
+              source: best.source,
+              size: best.size,
+              requestHeaders: {
+                ...(best.requestHeaders?.referer
+                  ? { referer: best.requestHeaders.referer }
+                  : {}),
+                ...(best.requestHeaders?.origin
+                  ? { origin: best.requestHeaders.origin }
+                  : {}),
+              },
+            };
+          } catch {
+            // 选择失败时默认取第一个
+            selected = {
+              url: m3u8List[0].url,
+              ext: m3u8List[0].ext,
+              source: m3u8List[0].source,
+              size: m3u8List[0].size,
+              requestHeaders: {},
+            };
+          }
         }
 
-        if (mp4List.length > 0) {
-          output += `### MP4 资源 (${mp4List.length}个)\n\n`;
-          mp4List.forEach((r, i) => {
-            output += `${i + 1}. \`${r.url}\`\n`;
-          });
-          output += "\n";
-        }
-
-        if (mpdList.length > 0) {
-          output += `### MPD 资源 (${mpdList.length}个)\n\n`;
-          mpdList.forEach((r, i) => {
-            output += `${i + 1}. \`${r.url}\`\n`;
-          });
-          output += "\n";
-        }
-
-        if (showAll && otherList.length > 0) {
-          output += `### 其他资源 (${otherList.length}个)\n\n`;
-          otherList.forEach((r, i) => {
-            output += `${i + 1}. [${r.ext}] \`${r.url}\`\n`;
-          });
-          output += "\n";
-        } else if (otherList.length > 0) {
-          output += `> 另有 ${otherList.length} 个其他类型资源（.ts 分片等），设置 showAll=true 可查看\n\n`;
-        }
-
-        return output;
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        return `嗅探失败：${msg}`;
-      }
-    },
-  });
-
-  // ===== 工具 2: 嗅探并下载 =====
-  server.addTool({
-    name: "sniff-and-download",
-    description:
-      "嗅探网页中的视频资源并生成下载命令。输入网页 URL，自动嗅探 m3u8 地址并生成 m3u8dl 下载命令。",
-    parameters: z.object({
-      url: z.string().describe("目标网页 URL"),
-      waitTime: z
-        .number()
-        .optional()
-        .describe("额外等待时间 (毫秒)，默认 8000"),
-      headless: z
-        .boolean()
-        .optional()
-        .describe("是否无头模式，默认 true"),
-      outputDir: z
-        .string()
-        .optional()
-        .describe(`下载保存目录，默认 ${DEFAULT_DOWNLOAD_DIR}`),
-      fileName: z
-        .string()
-        .optional()
-        .describe("保存文件名（不含扩展名）"),
-      autoSelect: z
-        .boolean()
-        .optional()
-        .describe(
-          "是否自动选择最佳 m3u8 链接生成下载命令，默认 true。设为 false 则只返回列表",
-        ),
-    }),
-    execute: async ({
-      url,
-      waitTime,
-      headless,
-      outputDir,
-      fileName,
-      autoSelect,
-    }) => {
-      try {
-        const saveDir = outputDir || DEFAULT_DOWNLOAD_DIR;
-
-        const results = await sniffMedia({
-          url,
-          waitTime,
-          headless,
-        });
-
-        const m3u8List = results.filter(
-          (r) => r.ext === "m3u8" || r.ext === "m3u",
+        return JSON.stringify(
+          {
+            selected,
+            stats: {
+              total: results.length,
+              m3u8: m3u8List.length,
+              mp4: mp4List.length,
+              mpd: mpdList.length,
+              other: otherList.length,
+            },
+            m3u8List: m3u8List.map((r) => ({
+              url: r.url,
+              ext: r.ext,
+              size: r.size,
+              source: r.source,
+            })),
+            mp4List: mp4List.map((r) => ({
+              url: r.url,
+              ext: r.ext,
+              size: r.size,
+              source: r.source,
+            })),
+            mpdList: mpdList.map((r) => ({
+              url: r.url,
+              ext: r.ext,
+              size: r.size,
+              source: r.source,
+            })),
+            otherList: otherList.map((r) => ({
+              url: r.url,
+              ext: r.ext,
+              size: r.size,
+              source: r.source,
+            })),
+          },
+          null,
+          2,
         );
-
-        if (m3u8List.length === 0) {
-          return (
-            `未嗅探到 m3u8 资源。共发现 ${results.length} 个其他媒体资源。\n\n` +
-            results
-              .filter((r) => ["mp4", "mpd"].includes(r.ext))
-              .map((r, i) => `${i + 1}. [${r.ext}] \`${r.url}\``)
-              .join("\n")
-          );
-        }
-
-        const target = await selectBestM3u8(m3u8List);
-
-        if (!autoSelect) {
-          let output = `发现 ${m3u8List.length} 个 m3u8 资源，请选择:\n\n`;
-          m3u8List.forEach((r, i) => {
-            output += `${i + 1}. \`${r.url}\` (${r.size} bytes)\n`;
-          });
-          return output;
-        }
-
-        const cmd = buildDownloadCommand(target.url, saveDir, fileName);
-        const isWin = process.platform === "win32";
-        const cmdText = isWin ? cmd.powershell : cmd.shell;
-        const lang = isWin ? "powershell" : "bash";
-
-        let output = `## 嗅探结果\n\n`;
-        output += `选中资源：\`${target.url}\`\n\n`;
-        output += `来源：${target.source}\n`;
-        output += `大小：${target.size} bytes\n`;
-        output += `保存目录：\`${saveDir}\`\n\n`;
-        output += `## 下载命令\n\n`;
-        output += `请复制以下命令在终端中执行：\n\n`;
-        output += `\`\`\`${lang}\n${cmdText}\n\`\`\`\n`;
-        output += `\n> 提示：命令中已包含优化参数（多线程、重试、超时等），可直接运行`;
-
-        return output;
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        return `操作失败：${msg}`;
+        return JSON.stringify(
+          {
+            selected: null,
+            stats: { total: 0, m3u8: 0, mp4: 0, mpd: 0, other: 0 },
+            m3u8List: [],
+            mp4List: [],
+            mpdList: [],
+            otherList: [],
+            error: msg,
+          },
+          null,
+          2,
+        );
       }
     },
   });
 
-  // ===== 工具 3: 直接下载 m3u8 =====
+  // ===== 工具 2: 直接下载 m3u8 =====
   server.addTool({
     name: "download-m3u8",
-    description: "生成 m3u8dl 下载命令（含优化参数），复制到终端执行即可下载，无需嗅探。",
+    description:
+      "生成 m3u8dl 下载命令（含优化参数），返回 JSON。支持传入 sniff 结果中的 referer/origin 请求头。",
     parameters: z.object({
       m3u8Url: z.string().describe("m3u8 链接地址"),
+      referer: z
+        .string()
+        .optional()
+        .describe(
+          "Referer 头（从 sniff 结果的 selected.requestHeaders.referer 获取）",
+        ),
+      origin: z
+        .string()
+        .optional()
+        .describe(
+          "Origin 头（从 sniff 结果的 selected.requestHeaders.origin 获取）",
+        ),
       outputDir: z
         .string()
         .optional()
@@ -213,25 +178,33 @@ export function registerCcTools(server: FastMCP): void {
         .optional()
         .describe("保存文件名（不含扩展名）"),
     }),
-    execute: async ({ m3u8Url, outputDir, fileName }) => {
+    execute: async ({ m3u8Url, referer, origin, outputDir, fileName }) => {
       try {
         const saveDir = outputDir || DEFAULT_DOWNLOAD_DIR;
-        const cmd = buildDownloadCommand(m3u8Url, saveDir, fileName);
+        const cmd = buildDownloadCommand(
+          m3u8Url,
+          saveDir,
+          fileName,
+          referer,
+          origin,
+        );
         const isWin = process.platform === "win32";
         const cmdText = isWin ? cmd.powershell : cmd.shell;
-        const lang = isWin ? "powershell" : "bash";
 
-        let output = `## 下载命令\n\n`;
-        output += `- m3u8 URL: \`${m3u8Url}\`\n`;
-        output += `- 保存目录：\`${saveDir}\`\n\n`;
-        output += `请复制以下命令在终端中执行：\n\n`;
-        output += `\`\`\`${lang}\n${cmdText}\n\`\`\`\n`;
-        output += `\n> 提示：命令中已包含优化参数（多线程、重试、超时等），可直接运行`;
-
-        return output;
+        return JSON.stringify(
+          {
+            command: cmdText,
+            m3u8Url,
+            saveDir,
+            exePath: cmd.exePath,
+            shell: isWin ? "powershell" : "bash",
+          },
+          null,
+          2,
+        );
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        return `操作失败：${msg}`;
+        return JSON.stringify({ error: msg }, null, 2);
       }
     },
   });

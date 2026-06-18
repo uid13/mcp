@@ -1,6 +1,6 @@
 {
   "name": "@uid13/pcm",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Personal Computer Manager MCP Service - 个人电脑管家 MCP 服务",
   "type": "module",
   "main": "dist/index.js",

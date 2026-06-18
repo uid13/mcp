@@ -197,6 +197,8 @@ export function buildDownloadCommand(
   m3u8Url: string,
   outputDir: string,
   fileName?: string,
+  referer?: string,
+  origin?: string,
 ): DownloadCommand {
   const exePath = getM3u8dlPath();
 
@@ -211,6 +213,15 @@ export function buildDownloadCommand(
     "--save-dir", outputDir,
     // 优化参数：加速下载
     "-H", `User-Agent: ${ua.toString()}`,  // 设置随机桌面端 Chrome User-Agent
+  ];
+  // 可选请求头：从 sniff 结果的 requestHeaders 中透传
+  if (referer) {
+    args.push("-H", `Referer: ${referer}`);
+  }
+  if (origin) {
+    args.push("-H", `Origin: ${origin}`);
+  }
+  args.push(
     "--thread-count", "16",              // 下载线程数（默认 8，提升到 16）
     "--download-retry-count", "5",       // 重试次数（默认 3，提升到 5）
     "--http-request-timeout", "120",     // HTTP 超时秒数（默认 100，提升到 120）
@@ -218,7 +229,7 @@ export function buildDownloadCommand(
     "--no-log",                          // 关闭日志文件输出，减少 IO
     "--log-level", "ERROR",              // 只显示错误日志
     "--del-after-done",                  // 完成后删除临时文件（默认已开启，显式声明）
-  ];
+  );
   if (fileName) {
     args.push("--save-name", fileName);
   }
