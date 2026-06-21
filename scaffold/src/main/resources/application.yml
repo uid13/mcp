@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: scaffold-mcp-server
+  ai:
+    mcp:
+      server:
+        name: scaffold-mcp-server
+        version: 1.0.0
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /stream
+
+server:
+  port: 4080
+
+logging:
+  level:
+    com.uid13.scaffold: INFO
+    org.springframework.ai: INFO

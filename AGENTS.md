@@ -20,7 +20,7 @@ mcp/
 ├── <service-name>/      # 服务目录
 │   ├── README.md        # 服务说明
 │   ├── AGENTS.md        # Agent 开发指南
-│   ├── package.json     # 或 pom.xml, go.mod, pyproject.toml
+│   ├── package.json     # 或 build.gradle, go.mod, pyproject.toml
 │   └── src/             # 源代码
 ├── docs/                # 共享文档
 └── scripts/             # 统一脚本
@@ -28,8 +28,8 @@ mcp/
 
 ### 服务开发流程
 
-1. 在根目录下创建服务目录（如 `pcm/`）
-2. 初始化项目（`npm init`, `mvn archetype`, `go mod init` 等）
+1. 在根目录下创建服务目录（如 `pcm/`、`scaffold/`）
+2. 初始化项目（`npm init`, `gradle init`, `go mod init` 等）
 3. 实现 MCP 协议接口
 4. 编写测试
 5. 更新文档
@@ -53,6 +53,7 @@ mcp/
 | 服务 | 语言 | 框架 | 构建工具 |
 |------|------|------|---------|
 | PCM | TypeScript | Vite | pnpm |
+| Scaffold | Java 21 | Spring Boot + Spring AI Alibaba | Gradle |
 
 ## 测试
 
@@ -66,6 +67,6 @@ mcp/
 
 使用 GitHub Actions，按路径触发：
 - `pcm/**` → 运行 TS CI
-- `java/**` → 运行 Java CI
+- `scaffold/**` → 运行 Java CI
 - `python/**` → 运行 Python CI
 - `go/**` → 运行 Go CI

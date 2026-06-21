@@ -7,6 +7,7 @@
 | 服务 | 语言 | 状态 | 文档 |
 |------|------|------|------|
 | PCM (Personal Computer Manager) | TypeScript + Vite | 开发中 | [README](./pcm/) |
+| Scaffold | Java 21 + Spring Boot | 开发中 | [README](./scaffold/) |
 
 ## 项目结构
 
@@ -21,7 +22,13 @@ mcp/
 │   ├── tsconfig.json
 │   ├── vite.config.ts
 │   ── src/
-├── docs/              # 共享文档
+├── scaffold/          # Gradle 脚手架 MCP 服务 (Java)
+│   ├── README.md
+│   ├── AGENTS.md
+│   ├── build.gradle
+│   ├── settings.gradle
+│   └── src/
+── docs/              # 共享文档
 └── scripts/           # 统一脚本
 ```
 

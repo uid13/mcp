@@ -3,6 +3,12 @@ node_modules/
 
 # 构建输出
 dist/
+build/
+target/
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
 
 # 日志
 *.log
