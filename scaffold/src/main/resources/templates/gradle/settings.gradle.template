@@ -17,4 +17,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = '[[${projectName}]]'
+rootProject.name = '{projectName}'

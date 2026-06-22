@@ -1,6 +1,5 @@
 package com.uid13.scaffold.config;
 
-import com.uid13.scaffold.resource.TemplateResourceProvider;
 import com.uid13.scaffold.tool.HelloTool;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
@@ -26,19 +25,6 @@ public class McpToolConfig {
     public ToolCallbackProvider helloTools(HelloTool helloTool) {
         return MethodToolCallbackProvider.builder()
                 .toolObjects(helloTool)
-                .build();
-    }
-
-    /**
-     * 注册模板资源工具
-     *
-     * @param templateResourceProvider 模板资源提供者
-     * @return ToolCallbackProvider
-     */
-    @Bean
-    public ToolCallbackProvider templateTools(TemplateResourceProvider templateResourceProvider) {
-        return MethodToolCallbackProvider.builder()
-                .toolObjects(templateResourceProvider)
                 .build();
     }
 }

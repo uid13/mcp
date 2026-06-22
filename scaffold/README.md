@@ -15,7 +15,10 @@
 ## 功能特性
 
 - **MCP Server**: 支持 Streamable-HTTP 传输协议
-- **Hello 工具**: 提供简单的 `hello` 方法，返回 "Hello World"
+- **MCP Tool**: `hello` 工具，返回 "Hello World"
+- **MCP Resource**: Gradle 项目脚手架模板资源
+  - `template://gradle/wrapper/gradle-wrapper.properties/{version}` — Wrapper 配置（未指定版本时默认 8.14.5）
+  - `template://gradle/settings.gradle/{projectName}` — Settings 配置
 
 ## 快速开始
 
@@ -54,16 +57,22 @@ scaffold/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/uid13/scaffold/
-│   │   │   ├── ScaffoldApplication.java        # 主入口
+│   │   │   ├── ScaffoldApplication.java            # 主入口
 │   │   │   ├── config/
-│   │   │   │   └── McpToolConfig.java          # MCP 工具注册
+│   │   │   │   └── McpToolConfig.java              # MCP 工具注册
+│   │   │   ├── resource/
+│   │   │   │   └── GradleTemplateResourceProvider.java  # Gradle 模板资源
 │   │   │   └── tool/
-│   │   │       └── HelloTool.java              # Hello 工具
+│   │   │       └── HelloTool.java                  # Hello 工具
 │   │   └── resources/
-│   │       └── application.yml                 # 应用配置
-│   └── test/
+│   │       ├── application.yml                     # 应用配置
+│   │       └── templates/
+│   │           └── gradle/
+│   │               ├── gradle-wrapper.properties.template
+│   │               └── settings.gradle.template
+│   ── test/
 │       └── java/com/uid13/scaffold/
-│           └── ScaffoldApplicationTests.java   # 测试
+│           └── ScaffoldApplicationTests.java       # 测试
 ├── README.md
 └── AGENTS.md
 ```
@@ -79,10 +88,34 @@ scaffold/
 ```java
 @Component
 public class MyTool {
-    
+
     @Tool(description = "工具描述")
     public String myMethod(String param) {
         return "结果";
+    }
+}
+```
+
+## 添加新资源
+
+1. 在 `com.uid13.scaffold.resource` 包下创建新的资源类
+2. 使用 `@McpResource` 注解定义资源 URI
+3. 模板文件放在 `src/main/resources/templates/` 下
+
+示例：
+
+```java
+@Component
+public class MyResourceProvider {
+
+    @McpResource(
+        uri = "template://my-category/my-resource/{param}",
+        name = "My Resource",
+        description = "资源描述"
+    )
+    public String myResource(String param) {
+        // 实现逻辑
+        return "内容";
     }
 }
 ```
@@ -99,6 +132,10 @@ spring:
         name: scaffold-mcp-server    # MCP Server 名称
         version: 1.0.0               # 版本号
         protocol: STREAMABLE         # 传输协议
+        streamable-http:
+          mcp-endpoint: /stream      # MCP 端点路径
+server:
+  port: 4080                         # 服务端口
 ```
 
 ## 许可证
