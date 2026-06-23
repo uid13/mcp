@@ -18,6 +18,7 @@ java {
 ext {
     springAiVersion = '1.1.2'
     springAiAlibabaVersion = '1.1.2.2'
+    springAiExtensionsVersion = '1.1.2.2'
 }
 
 dependencyManagement {
